@@ -1,11 +1,11 @@
-# CubevecEngine
-2D/3D physics engine in C89  
+# NeoPhysics
+2D/3D physics engine in C99  
 
 NOTE : This engine is still currently unstable.
 
 ![My Image](sample.jpg)
 
-# version 0.0.4
+# version 0.0.5
  see [update_log.txt](https://github.com/ZvRzyan18/CubevecEngine/blob/main/update_log.txt)
 
 
