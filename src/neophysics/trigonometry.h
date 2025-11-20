@@ -4,15 +4,34 @@
 #include "neophysics/types.h"
 #include "neophysics/compiler_hint.h"
 
+//-------------------------------------------------------------------//
+//coeffs polynomial with lowest degree
+//just acceptable enough for rough estimation
 #define __SIN_0 ((NPReal)( 0.008028e-00))
 #define __SIN_1 ((NPReal)(-0.166607e-00))
- 
+
 #define __COS_0 ((NPReal)(-0.001312e-00))
 #define __COS_1 ((NPReal)( 0.041592e-00))
 #define __COS_2 ((NPReal)(-0.499976e-00))
 #define __COS_3 ((NPReal)( 0.999998e-00))
 
 
+/*
+
+               point in unit circle
+               *
+              / |
+             /  |
+  radius -> /   |
+           /    | -> sin
+          /     |
+         / |    |
+ origin *------ *
+       angle  | -> cos
+
+  cos(theta) = x-axis of theta angle
+  sin(theta) = y-axis of theta angle
+*/
 NP_HOT 
 NP_INLINE void __np_internal_sincos(NPReal x, NPUint8 sign, NPReal *s, NPReal *c) {
  NPReal mx, mx_s, mx_c, x2_c, x2_s, out_s, out_c, a;
@@ -37,8 +56,8 @@ NP_INLINE void __np_internal_sincos(NPReal x, NPUint8 sign, NPReal *s, NPReal *c
 
  sign_s =    sign_s ^ (q == 2 || q == 3);
 
- mx_s =      flip_s ? (1.57079632 - mx_s) : mx_s;
- mx_c =      flip_c ? (mx_c - 1.57079632) : mx_c;
+ mx_s =      flip_s ? ((NPReal)1.57079632 - mx_s) : mx_s;
+ mx_c =      flip_c ? (mx_c - (NPReal)1.57079632) : mx_c;
 
  x2_s =      mx_s * mx_s;
  x2_c =      mx_c * mx_c;
@@ -56,6 +75,8 @@ NP_INLINE void __np_internal_sincos(NPReal x, NPUint8 sign, NPReal *s, NPReal *c
  out_c =     sign_c ? -out_c : out_c;
  *c = out_c;
 }
+
+
 
 #endif
 

@@ -10,35 +10,91 @@
 #include "neophysics/decay.h"
 #include <math.h>
 
+
+
+// general purpose math for this physics engine
+// much better to use wrapper to make it consistent
+// and easy to change implementation
+
 typedef struct {
 	NPReal x, y;
 } NPReal2;
+
+
+
+//-------------------------------------------------------------------//
 
 
 /*
  scalar math functions
 */
 
+NP_HOT
+NP_INLINE NPReal __NPNan(void) {
+ NPRealBit bits;
+#ifdef NP_USE_FLOAT64
+ bits.i = 0x7FF0000000000001;
+#else
+ bits.i = 0x7F800001;
+#endif
+ return bits.f;
+}
+
+NP_HOT
+NP_INLINE NPReal __NPInfinity(void) {
+ NPRealBit bits;
+#ifdef NP_USE_FLOAT64
+ bits.i = 0x7FF0000000000000;
+#else
+ bits.i = 0x7F800000;
+#endif
+ return bits.f;
+}
+
+NP_HOT
+NP_INLINE NPReal __NPNegativeInfinity(void) {
+ NPRealBit bits;
+#ifdef NP_USE_FLOAT64
+ bits.i = 0xFFF0000000000000;
+#else
+ bits.i = 0xFF800000;
+#endif
+ return bits.f;
+}
+
+/*
+ absolute value, convert negative into positive
+*/
 NP_HOT 
-NP_INLINE NPReal __NPAbs(NPReal a) {
+NP_INLINE 
+NPReal __NPAbs(NPReal a) {
  return a < (NPReal)0.0 ? -a : a;
 }
 
-
+/*
+ select minimum value
+*/
 NP_HOT 
-NP_INLINE NPReal __NPMin(NPReal a, NPReal b) {
+NP_INLINE 
+NPReal __NPMin(NPReal a, NPReal b) {
  return a < b ? a : b;
 }
 
-
+/*
+ select maximum value
+*/
 NP_HOT 
-NP_INLINE NPReal __NPMax(NPReal a, NPReal b) {
+NP_INLINE 
+NPReal __NPMax(NPReal a, NPReal b) {
  return a < b ? b : a;
 }
 
-
+/*
+ clamp value between the min and max input
+*/
 NP_HOT
-NP_INLINE NPReal __NPClamp(NPReal x, NPReal __min_value, NPReal __max_value) {
+NP_INLINE 
+NPReal __NPClamp(NPReal x, NPReal __min_value, NPReal __max_value) {
  return __NPMin(__NPMax(x, __min_value), __max_value);
 }
 
@@ -60,7 +116,9 @@ NP_INLINE NPReal __NPDecay(NPUint8 type, NPReal x, NPReal decay_const, NPReal ti
  return (NPReal)0.0;
 }
 
-
+/*
+ return the sqrt approximation
+*/
 NP_HOT 
 NP_INLINE 
 NPReal __NPSqrt(NPReal x) {
@@ -68,7 +126,9 @@ NPReal __NPSqrt(NPReal x) {
 	return sqrtf(x);
 }
 
-
+/*
+ return the inv sqrt approximation
+*/
 NP_HOT 
 NP_INLINE 
 NPReal __NPInvSqrt(NPReal x) {
@@ -90,7 +150,7 @@ NPReal2 __NPSinCos(NPReal x) {
 	
 	//TODO : use bit checking instead.
 	//infinity/nan
-	if(NPUnlikely( (((NPReal)1.0 / (NPReal)0.0) ) == x || x != x )) {
+	if(NPUnlikely( __NPInfinity() == __NPAbs(x) || x != x )) {
 	 out.x = x;
 	 out.y = x;
 	 return out;
@@ -113,7 +173,7 @@ NP_INLINE
 NPReal __NPExp2(NPReal x) {
 	//TODO : use bit checking instead.
 	//infinity/nan
-	if(NPUnlikely( (((NPReal)1.0 / (NPReal)0.0) ) == x || x != x ))
+	if(NPUnlikely( __NPInfinity() == __NPAbs(x) || x != x ))
   return x;
  
  //return infinity
@@ -131,7 +191,7 @@ NP_INLINE
 NPReal __NPLog2f(NPReal x) {
 	//TODO : use bit checking instead.
 	//infinity/nan
-	if(NPUnlikely( (((NPReal)1.0 / (NPReal)0.0) ) == x || x != x ))
+	if(NPUnlikely( __NPInfinity() == __NPAbs(x) || x != x ))
   return x;
   
  //return nan if x is negative (undefined)
@@ -142,15 +202,25 @@ NPReal __NPLog2f(NPReal x) {
 	return __np_internal_log2(x);
 }
 
-/*
- vector functions
-*/
 
+
+//-------------------------------------------------------------------//
+//vector functions
+
+//TODO : USE SIMD INSTRUCTIONS IF AVAILABLE
 /*
  perpendicular vector,
  return the vector, that forms a 90 degree from 
  an input vector
 */
+
+NP_HOT
+NP_INLINE
+NPReal __NPCross2(NPReal2 a, NPReal2 b) {
+ return a.x * b.y - a.y * b.x;
+}
+
+
 NP_HOT
 NP_INLINE
 NPReal2 __NPPerp2(NPReal2 v) {
@@ -173,8 +243,15 @@ NPReal2 __NPAbs2(NPReal2 v) {
 
 NP_HOT
 NP_INLINE
+NPReal __NPDot2(NPReal2 a, NPReal2 b) {
+ return a.x * b.x + a.y * b.y;
+}
+
+
+NP_HOT
+NP_INLINE
 NPReal __NPLengthSquared2(NPReal2 v) {
-	return v.x * v.x + v.y * v.y;
+	return __NPDot2(v, v);
 }
 
 NP_HOT
