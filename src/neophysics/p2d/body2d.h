@@ -67,7 +67,7 @@ typedef union {
  simple integration
 */
 NP_HOT
-NP_INLINE void __NPGenericBody2DIntegrate(NPGenericBody2D *body, NPReal dt, NPReal2 gravity) {
+NP_INLINE void __NPGenericBody2DIntegrate(NPGenericBody2D *body, const NPReal dt, const NPReal2 gravity) {
  NPReal2 vec_dt = __NPAsVector2(dt);
  
  body->components.force = __NPMulAdd2(body->components.force, __NPAsVector2(body->components.inv_mass), gravity);
@@ -97,6 +97,13 @@ NP_INLINE void __NPPolygonBody2DUpdateTransform(NPPolygonBody2D *body) {
 	NPReal2 prev_vector = __NPRotate2(body->raw_vertices->vertices[0], normalized_direction);
 	body->vertices[0] = __NPAdd2(prev_vector, body->position);
 
+ //re initialize
+ body->aabb_min.x = __NPInfinity();
+ body->aabb_min.y = __NPInfinity();
+ body->aabb_max.x = __NPNegativeInfinity();
+ body->aabb_max.y = __NPNegativeInfinity();
+
+ //first vertex
  body->aabb_min.x = __NPMin(body->aabb_min.x, body->vertices[0].x);
  body->aabb_min.y = __NPMin(body->aabb_min.y, body->vertices[0].y);
  body->aabb_max.x = __NPMax(body->aabb_max.x, body->vertices[0].x);
@@ -128,7 +135,7 @@ NP_INLINE void __NPPolygonBody2DUpdateTransform(NPPolygonBody2D *body) {
  initialize and pre calculate object components
 */
 NP_COLD
-NP_INLINE void __NPPolygonBody2DInit(NPPolygonBody2D *body, NPInputCallback2D *callbacks, NPPolygonBody2DComponents *components) {
+NP_INLINE void __NPPolygonBody2DInit(NPPolygonBody2D *body, const NPInputCallback2D *callbacks, const NPPolygonBody2DComponents *components) {
 	body->type = (components->body_type << 8) | components->movement_type;
 	body->raw_vertices = (NPBufferComponents2D*)components->vertices_buffer;
 	
@@ -145,16 +152,13 @@ NP_INLINE void __NPPolygonBody2DInit(NPPolygonBody2D *body, NPInputCallback2D *c
 	
 	body->restitution = components->restitution;
 	body->position.x = components->position[0];
-	body->position.y = components->position[1];
-	body->scale.x = components->scale[0];
-	body->scale.y = components->scale[1];
-	body->rotation = components->rotation;
+	body->position.y = components->position[1];	body->rotation = components->rotation;
 	body->restitution = components->restitution;
 
- const	NPReal area = __NPPolygon2DArea(body->raw_vertices->vertices, body->raw_vertices->vertices_size, body->scale);
+ const	NPReal area = __NPPolygon2DArea(body->raw_vertices->vertices, body->raw_vertices->vertices_size, components->scale);
 	body->inv_mass = (NPReal)1.0 / (components->density * area);
 
-	if(NPUnlikely(body->scale.x == (NPReal)0.0 || body->scale.y == (NPReal)0.0))
+	if(NPUnlikely(components->scale[0] == (NPReal)0.0 || components->scale[0] == (NPReal)0.0))
 	 callbacks->error(NP_ZERO_SCALE);
 	
 	__NPPolygonBody2DUpdateTransform(body);
@@ -168,7 +172,7 @@ NP_INLINE void __NPPolygonBody2DInit(NPPolygonBody2D *body, NPInputCallback2D *c
  to make it even faster, it should not perform any null checking
 */
 NP_HOT
-NP_INLINE void __NPPolygonBody2DUpdate(NPPolygonBody2D *body, NPReal dt, NPReal2 gravity) {
+NP_INLINE void __NPPolygonBody2DUpdate(NPPolygonBody2D *body, const NPReal dt, const NPReal2 gravity) {
 	__NPGenericBody2DIntegrate((NPGenericBody2D*)body, dt, gravity);
 	__NPPolygonBody2DUpdateTransform(body);
 }
@@ -178,7 +182,7 @@ NP_INLINE void __NPPolygonBody2DUpdate(NPPolygonBody2D *body, NPReal dt, NPReal2
  and deallocates its memory
 */
 NP_COLD
-NP_INLINE void __NPPolygon2DDestroy(NPPolygonBody2D *body, NPInputCallback2D *callbacks) {
+NP_INLINE void __NPPolygon2DDestroy(NPPolygonBody2D *body, const NPInputCallback2D *callbacks) {
  if(NPUnlikely(body->vertices == NPNULL)) {
   callbacks->error(NP_DEALLOCATION_FAILED);
   return;

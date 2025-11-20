@@ -8,7 +8,7 @@
  create a NPWorld2D object.
  returns null if failed.
 */
-NP_API NPWorld2D npWorld2DCreate(NPInputCallback2D *callbacks) {
+NP_API NPWorld2D npWorld2DCreate(const NPInputCallback2D *callbacks) {
 	if(NPUnlikely(callbacks == NPNULL))
 	 return NPNULL;
 	
@@ -35,12 +35,20 @@ NP_API void npWorld2DDestroy(NPWorld2D world) {
 	callback.free(world_components);
 }
 
+
+/*
+ update the simulation frame by frame
+*/
+NP_API void npWorld2DUpdate(NPWorld2D world, const NPReal dt) {
+ __NPWordComponents2DUpdate((NPWorldComponents2D*)world, dt);
+}
+
 /*
  the amount of subdivisions in delta time, making simulations
  a lot more accurate
  if it is more than 100 itbwill throw an input failed 
 */
-NP_API void npWorld2DSetMaxSubIterations(NPWorld2D world, NPUint32 max_num) {
+NP_API void npWorld2DSetMaxSubIterations(NPWorld2D world, const NPUint32 max_num) {
 	NPWorldComponents2D *world_components = (NPWorldComponents2D*)world;
 
  //handle null pointer and too large input
@@ -57,7 +65,7 @@ NP_API void npWorld2DSetMaxSubIterations(NPWorld2D world, NPUint32 max_num) {
  create a NPBody2D object
  terminate if world2d is null
 */
-NP_API NPBody2D npWorld2DCreateBody2D(NPWorld2D world, NPPointer *components) {
+NP_API NPBody2D npWorld2DCreateBody2D(NPWorld2D world, const NPPointer *components) {
 	//handle null pointer
 	if(NPUnlikely(world == NPNULL))
 	 return 0xFFFF;
@@ -86,7 +94,7 @@ NP_API void npWorld2DDestroyBody2D(NPWorld2D world, NPBody2D body) {
  create and allocate a new buffer
  call allocated failed if unsucessful
 */
-NP_API NPReadonlyBuffer2D npReadonlyBuffer2DAllocate(NPInputCallback2D *callbacks, NPPointer data, NPUint8 vertices_size) {
+NP_API NPReadonlyBuffer2D npReadonlyBuffer2DAllocate(const NPInputCallback2D *callbacks, const NPPointer data, const NPUint8 vertices_size) {
  //callback validation
 	if(NPUnlikely( (callbacks->malloc == NPNULL) || (callbacks->free == NPNULL) || (callbacks->error == NPNULL) ))
 	 return NPNULL;
@@ -97,7 +105,7 @@ NP_API NPReadonlyBuffer2D npReadonlyBuffer2DAllocate(NPInputCallback2D *callback
  destroy buffer 
  call deallocation failed if unsucessful
 */
-NP_API void npReadonlyBuffer2DDestroy(NPReadonlyBuffer2D buffer, NPInputCallback2D *callbacks) {
+NP_API void npReadonlyBuffer2DDestroy(NPReadonlyBuffer2D buffer, const NPInputCallback2D *callbacks) {
  //callback validation
 	if(NPUnlikely( (callbacks->malloc == NPNULL) || (callbacks->free == NPNULL) || (callbacks->error == NPNULL) ))
 	 return;

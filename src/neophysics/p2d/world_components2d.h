@@ -6,6 +6,7 @@
 #include "neophysics/p2d/body2d.h"
 #include "neophysics/p2d/contact_hash2d.h"
 #include "neophysics/p2d/container_body2d.h"
+#include "neophysics/p2d/broadphase2d.h"
 
 #include <string.h>
 /*
@@ -18,6 +19,7 @@ typedef struct {
 	NPContainerBody2D container_body;
 	
 	NPContactHash2D   contact_cache;
+	NPBroadphase2D    broadphase;
 } NPWorldComponents2D;
 
 /*
@@ -36,6 +38,7 @@ NP_INLINE void __NPWorldComponents2DInit(NPWorldComponents2D *ctx) {
 */
 NP_COLD
 NP_INLINE void __NPWorldComponents2DDestroy(NPWorldComponents2D * ctx) {
+ __NPBroadphase2DDestroy(&ctx->broadphase, &ctx->input_callbacks);
 	__NPContactHashDestroy(&ctx->contact_cache, &ctx->input_callbacks);
  __NPContainerBodyDestroy(&ctx->container_body, &ctx->input_callbacks);
 }
@@ -45,7 +48,7 @@ NP_INLINE void __NPWorldComponents2DDestroy(NPWorldComponents2D * ctx) {
  return its current index id
 */
 NP_COLD
-NP_INLINE NPUint16 __NPWorldComponents2DAddBody(NPWorldComponents2D * ctx, NPPointer ptr) {
+NP_INLINE NPUint16 __NPWorldComponents2DAddBody(NPWorldComponents2D *ctx, const NPPointer ptr) {
  NPGenericBody2D body;
 	const NPUint16 body_type = *(NPUint16*)ptr;
 	
@@ -56,7 +59,9 @@ NP_INLINE NPUint16 __NPWorldComponents2DAddBody(NPWorldComponents2D * ctx, NPPoi
 		 __NPPolygonBody2DInit((NPPolygonBody2D*)&body, &ctx->input_callbacks, (NPPolygonBody2DComponents*)ptr);
 		break; //NP_POLYGON_2D:
 	}
-	return __NPContainerBodyAddObject(&ctx->container_body, &ctx->input_callbacks, body);
+	const NPUint16 id = __NPContainerBodyAddObject(&ctx->container_body, &ctx->input_callbacks, body);
+	__NPBroadphase2DAddObject(&ctx->broadphase, &ctx->input_callbacks, id);
+	return id;
 }
 
 /*
@@ -64,7 +69,7 @@ NP_INLINE NPUint16 __NPWorldComponents2DAddBody(NPWorldComponents2D * ctx, NPPoi
  call error NP_OBJECT_NOT_FOUND if the object does not exist 
 */
 NP_COLD
-NP_INLINE void __NPWorldComponents2DDestroyBody(NPWorldComponents2D * ctx, NPUint16 id) {
+NP_INLINE void __NPWorldComponents2DDestroyBody(NPWorldComponents2D *ctx, const NPUint16 id) {
  //make sure that it has null pointer safety
  if(NPUnlikely(
   (ctx->container_body.body_array == NPNULL) || 
@@ -85,7 +90,23 @@ NP_INLINE void __NPWorldComponents2DDestroyBody(NPWorldComponents2D * ctx, NPUin
    __NPPolygon2DDestroy((NPPolygonBody2D*)&ctx->container_body.body_array[id], &ctx->input_callbacks);
  	break; //NP_POLYGON_2D:
  }
+ __NPBroadphase2DRemoveObject(&ctx->broadphase, &ctx->input_callbacks, id);
  __NPContainerBodyRemoveObject(&ctx->container_body, &ctx->input_callbacks, id);
+}
+
+/*
+ update function of a world2d
+*/
+NP_HOT
+NP_INLINE void __NPWordComponents2DUpdate(NPWorldComponents2D *ctx, const NPReal dt) {
+ const NPUint16 body_size = ctx->container_body.body_size;
+ NPUint16 body_index = 0;
+ 
+ while(body_index < body_size) {
+  //ctx->container.body_array[body_index];
+  
+  body_index++;
+ }
 }
 
 
