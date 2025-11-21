@@ -4,9 +4,13 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define NP_ASSERT_SIZE(type, size) \
+    typedef char ____assert_size_##type[(sizeof(type) == (size)) ? 1 : -1]
+
 typedef uint8_t NPUint8;
 typedef uint16_t NPUint16;
 typedef uint32_t NPUint32;
+typedef uint64_t NPUint64;
 typedef int16_t NPInt16;
 typedef int32_t NPInt32;
 typedef void*    NPPointer;
@@ -14,15 +18,21 @@ typedef void*    NPPointer;
 #ifdef NP_USE_FLOAT64
 typedef double NPReal;
 typedef union {
- double f;
+ NPReal f;
  NPUint64 i;
 } NPRealBit;
+
+NP_ASSERT_SIZE(NPReal, sizeof(NPUint64));
+
 #else 
 typedef float NPReal;
 typedef union {
- float f;
+ NPReal f;
  NPUint32 i;
 } NPRealBit;
+
+NP_ASSERT_SIZE(NPReal, sizeof(NPUint32));
+
 #endif
 
 #define NPNULL NULL

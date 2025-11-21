@@ -34,7 +34,7 @@ typedef struct {
  terminate if failed
 */
 NP_HOT
-NP_INLINE void __NPContactHashReserve(NPContactHash2D *table, NPInputCallback2D *callbacks, uint8_t max_reserve) {
+NP_INLINE void __NPContactHashReserve(NPContactHash2D *table, const NPInputCallback2D *callbacks, uint8_t max_reserve) {
 	if(NPUnlikely(table->nodes == NPNULL)) {
 		table->nodes = (NPContactHashNode2D*)callbacks->malloc(sizeof(NPContactHashNode2D) * max_reserve);
 		
@@ -77,12 +77,14 @@ NP_INLINE NPUint32 __NPContactHashFindNextEmptySlot(NPContactHash2D *table) {
 	return (NPUint32)(node - table->nodes);
 }
 
+
+
 /*
  insert elements and use (a + b) & 7 to combine the contact pair 
  index into one unique id
 */
 NP_HOT
-NP_INLINE void __NPContactHashInsertElement(NPContactHash2D *table, NPInputCallback2D *callbacks, NPUint16 a, NPUint16 b, NPContactManifold2D *data) {
+NP_INLINE void __NPContactHashInsertElement(NPContactHash2D *table, const NPInputCallback2D *callbacks, NPUint16 a, NPUint16 b, NPContactManifold2D *data) {
 	NPContactHashNode2D node;
 	node.a = a < b ? a : b;
 	node.b = a < b ? b : a;
@@ -104,6 +106,15 @@ NP_INLINE void __NPContactHashInsertElement(NPContactHash2D *table, NPInputCallb
   NPUint32 next_index = index;
  	do {
 	 	prev_index = next_index;
+	 	
+	 	//already exist, replace
+	 	if(NPUnlikely(start_node->a == node.a && start_node->b == node.b)) {
+	 	 //*start_node = node;
+	 	 __NPContactManifold2DCombine(&start_node->contact_info, &start_node->contact_info, &node.contact_info);
+	 	 return;
+	 	}
+	 	
+	 	//does not exist, create a new one
 	 	if(NPUnlikely(start_node->next == 0xFFFFFFFF)) {
 			 prev_index = next_index;
 		 	next_index = __NPContactHashFindNextEmptySlot(table);
@@ -146,6 +157,32 @@ NP_INLINE void __NPContactHashDeleteElement(NPContactHash2D *table, NPUint16 a, 
 	table->nodes_size--;
 }
 
+
+/*
+ remove elements that is currently not in contact.
+ reset its state contact value at the same time to make it
+ more efficient in iteration.
+*/
+NP_HOT
+NP_INLINE void __NPContactHashRemoveNotContact(NPContactHash2D *table) {
+ NPUint16 node_index = 0;
+ 
+ while(node_index < table->nodes_size) {
+  
+  const NPUint16 body_a = table->nodes[node_index].a;
+  const NPUint16 body_b = table->nodes[node_index].b;
+  
+  if(body_a != 0xFFFF && body_b != 0xFFFF) {
+   if(!table->nodes[node_index].still_contact) {
+    __NPContactHashDeleteElement(table, body_a, body_b);
+   } else {
+    table->nodes[node_index].still_contact = 0xFFFF;
+   }
+  }
+  node_index++;
+ }
+}
+
 /*
  find the index of element base on the given pair of object indices
  return index for fast access
@@ -160,19 +197,21 @@ NP_INLINE NPUint32 __NPContactHashFindIndexOf(NPContactHash2D *table, NPUint16 a
 	NPUint32 next_index = index;
 	do {
 		prev_index = next_index;
-		if(NPUnlikely(start_node->a == ma && start_node->b == mb))
-		 break;
+		if(NPUnlikely(start_node->a == ma && start_node->b == mb)) {
+		 return next_index;
+		}
 		next_index = start_node->next;
 		start_node = &table->nodes[start_node->next];
 	} while(1);
-	return next_index;
+	return 0xFFFFFFFF;
 }
 
 /*
  destroy hash table contact
+ use NPLikely hint hoping that the compiler might optimize it.
 */
 NP_COLD
-NP_INLINE void __NPContactHashDestroy(NPContactHash2D *table, NPInputCallback2D *callbacks) {
+NP_INLINE void __NPContactHashDestroy(NPContactHash2D *table, const NPInputCallback2D *callbacks) {
 	if(NPLikely(table->nodes != NPNULL))
 	 callbacks->free(table->nodes);
 }

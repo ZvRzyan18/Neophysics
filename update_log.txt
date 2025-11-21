@@ -1,3 +1,37 @@
+# NeoPhysics Core 0.0.6
+
+• implement new broadphase2d
+
+• implemented null safety
+
+• always check for null pointers
+
+• adopt c99 standard
+
+• revice codebase
+
+• more organized codebase
+
+• use hash-based caching for contacts
+
+• renamed from cubevec engine into neophysics
+
+# Cubevec Engine Core 0.0.5
+
+• optimize inv sqrt macro
+
+• optimize sincos function
+
+• use hot attribute as fastcall for thight loops
+
+• revised logarithm function
+
+• revised exponential function
+
+• use compiler hints "likely, unlikely, unreachable"
+
+• used index instead of function pointers (reduces memory consumption for memory per object)
+
 # Cubevec Engine Core 0.0.4
 
 • linear/angular damping implemented

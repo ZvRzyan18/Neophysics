@@ -6,6 +6,7 @@
 
 #include <string.h>
 
+
 typedef struct {
 	NPGenericBody2D *body_array;
 	NPUint16        body_size; //10k+ objects is more than enough
@@ -44,6 +45,7 @@ NP_INLINE void __NPContainerBodyReserve(NPContainerBody2D *container, NPInputCal
 		container->body_reserve = reserve;
 		return;
 	}
+	//undefined behaviour
 	NPUnreachable();
 }
 
@@ -102,7 +104,6 @@ NP_INLINE void __NPContainerBodyDestroy(NPContainerBody2D *container, NPInputCal
 	if(NPLikely(container->body_array != NPNULL)) 
 	 callbacks->free(container->body_array);
 }
-
 
 
 #endif
