@@ -5,7 +5,7 @@ NOTE : This engine is still currently unstable.
 
 ![My Image](sample.jpg)
 
-# version 0.0.5
+# version 0.0.6
  see [update_log.txt](https://github.com/ZvRzyan18/CubevecEngine/blob/main/update_log.txt)
 
 
