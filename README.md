@@ -1,5 +1,5 @@
 # NeoPhysics
-2D/3D physics engine in C99  
+2D/3D physics engine for C11, Designed to be fast, minimal and efficient 
 
 NOTE : This engine is still currently unstable.
 
