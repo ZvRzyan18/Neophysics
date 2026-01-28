@@ -1,3 +1,13 @@
+# NeoPhysics Core 0.1.0
+
+* rewrite core functionality
+
+* introduce new interface
+
+* adopt c11 for better multithread support
+
+* introduce new core functionalities
+
 # NeoPhysics Core 0.0.6
 
 • implement new broadphase2d
