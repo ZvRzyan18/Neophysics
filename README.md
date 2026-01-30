@@ -1,11 +1,11 @@
 # NeoPhysics
-2D/3D physics engine for C11, Designed to be fast, minimal and efficient 
+3D physics engine for C11, Designed to be fast, minimal and efficient 
 
 NOTE : This engine is still currently unstable.
 
 ![My Image](sample.jpg)
 
-# version 0.0.6
+# version 0.1.0
  see [update_log.txt](https://github.com/ZvRzyan18/CubevecEngine/blob/main/update_log.txt)
 
 
@@ -13,36 +13,20 @@ NOTE : This engine is still currently unstable.
 
 **Bodies**
 
-• Rect Body 2D
-
-• Circle Body 2D
-
-• Triangle Body 2D (not yet implemented)
-
-• Convex Body 2D (not yet implemented)
+• ___
 
 **Broadphase**
 
-• Bruite Force 2D
+• ___
 
-• Sweep And Prune X-axis 2D
-
-• Sweep And Prune Y-axis 2D
 
 
 
 # Todo
 
-• implement triangle collision
-
-• implement convex collision
-
-• add support for fixed joint
-
+• add basic arm neon and sse support (currently experimantal)
 
 # Future plans
-• better SIMD support
 
-• C++/Rust interface
+• ___
 
-• 3D support
