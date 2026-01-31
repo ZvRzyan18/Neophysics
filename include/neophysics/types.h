@@ -2,52 +2,52 @@
 #define NP_TYPES_H
 
 #include <stdint.h>
-#include <stddef.h>
 
-#define NP_ASSERT_SIZE(type, size) \
-    typedef char ____assert_size_##type[(sizeof(type) == (size)) ? 1 : -1]
+#define NP_ENABLE_EXPERIMENTAL_ARM_NEON 
+#define NP_USE_F64
 
-typedef uint8_t NPUint8;
-typedef uint16_t NPUint16;
-typedef uint32_t NPUint32;
-typedef uint64_t NPUint64;
-typedef int16_t NPInt16;
-typedef int32_t NPInt32;
-typedef void*    NPPointer;
+#define NP_ALIGNED alignas(16)
 
-#ifdef NP_USE_FLOAT64
-typedef double NPReal;
-typedef union {
- NPReal f;
- NPUint64 i;
-} NPRealBit;
-
-NP_ASSERT_SIZE(NPReal, sizeof(NPUint64));
-
-#else 
-typedef float NPReal;
-typedef union {
- NPReal f;
- NPUint32 i;
-} NPRealBit;
-
-NP_ASSERT_SIZE(NPReal, sizeof(NPUint32));
-
+#if defined(NP_ENABLE_EXPERIMENTAL_ARM_NEON) && (defined(__ARM_NEON) || defined(__ARM_NEON__))
+#define NP_HAS_NEON
+#include <arm_neon.h> 
 #endif
 
-#define NPNULL NULL
-#define NP_API
-
-enum NPErrorCode {
-	NP_ALLOCATION_FAILED,
-	NP_DEALLOCATION_FAILED,
-	NP_INPUT_FAILED,
-	NP_OBJECT_NOT_FOUND,
-	NP_INVALID_STALE_POINTER,
-	NP_ZERO_SCALE, 
-};
-
-
+#ifdef NP_USE_F64
+typedef double np_real;
+typedef uint64_t np_urb;
+typedef int64_t np_srb;
+#else
+typedef float np_real;
+typedef uint32_t np_urb;
+typedef int32_t np_srb;
 #endif
 
+#define NP_TRUE 1
+#define NP_FALSE 0
+
+typedef uint64_t np_u64;
+typedef int64_t  np_s64;
+typedef uint32_t np_u32;
+typedef int32_t  np_s32;
+typedef uint16_t np_u16;
+typedef int16_t  np_s16;
+typedef uint8_t np_u8;
+typedef int8_t  np_s8;
+
+typedef size_t np_size;
+
+#if defined(__GNUC__) || defined(__clang__)
+#define NP_LIKELY(x)   __builtin_expect(!!(x), 1)
+#define NP_UNLIKELY(x) __builtin_expect(!!(x), 0)
+#define NP_HOT __attribute__((hot, unused))
+#define NP_COLD __attribute__((cold, unused))
+#else
+#define NP_LIKELY(x)  (x)
+#define NP_UNLIKELY(x) (x)
+#define NP_HOT 
+#define MP_COLD 
+#endif
+
+#endif
 
